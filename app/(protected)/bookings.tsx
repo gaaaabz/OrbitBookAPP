@@ -4,30 +4,107 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Ionicons } from '@expo/vector-icons';
 import { bookingService } from '../../services/bookingService';
 import { destinationService } from '../../services/destinationService';
+import EmptyState from '../../components/ui/EmptyState';
+import { colors, spacing, radius, fontSize, statusColor, statusLabel } from '../../constants/theme';
 import type { Reserva, Destino } from '../../services/types';
 
-const STATUS_LABEL: Record<string, string> = {
-  PENDENTE: 'Pendente',
-  CONFIRMADO: 'Confirmada',
-  EM_MISSAO: 'Em Missão',
-  CONCLUIDO: 'Concluída',
-  CANCELADO: 'Cancelada',
-};
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
-const STATUS_COLOR: Record<string, string> = {
-  PENDENTE: '#FBBF24',
-  CONFIRMADO: '#34D399',
-  EM_MISSAO: '#60A5FA',
-  CONCLUIDO: '#A78BFA',
-  CANCELADO: '#F87171',
-};
+function BookingCard({
+  item,
+  destino,
+  onCancel,
+  canceling,
+  onPress,
+}: {
+  item: Reserva;
+  destino?: Destino;
+  onCancel: () => void;
+  canceling: boolean;
+  onPress: () => void;
+}) {
+  const key = item.status ?? 'PENDENTE';
+  const sColor = statusColor[key] ?? colors.textMuted;
+  const sLabel = statusLabel[key] ?? key;
+  const canCancel = key === 'PENDENTE' || key === 'CONFIRMADO';
+  const preco = Number(item.valor_total).toLocaleString('pt-BR');
+
+  return (
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+      {/* colored left accent bar */}
+      <View style={[styles.accentBar, { backgroundColor: sColor }]} />
+
+      <View style={styles.cardBody}>
+        {/* destination name + status */}
+        <View style={styles.topRow}>
+          <Text style={styles.cardDestino} numberOfLines={1}>
+            {destino ? destino.nome : `Reserva #${item.id}`}
+          </Text>
+          <View style={[styles.statusPill, { backgroundColor: sColor + '22', borderColor: sColor + '55' }]}>
+            <Text style={[styles.statusText, { color: sColor }]}>{sLabel}</Text>
+          </View>
+        </View>
+
+        {/* dates */}
+        <View style={styles.metaRow}>
+          <Ionicons name="calendar-outline" size={13} color={colors.textMuted} />
+          <Text style={styles.metaText}>
+            {formatDate(item.departure_date)} → {formatDate(item.return_date)}
+          </Text>
+        </View>
+
+        {/* passengers + price */}
+        <View style={styles.bottomRow}>
+          <View style={styles.metaRow}>
+            <Ionicons name="people-outline" size={13} color={colors.textMuted} />
+            <Text style={styles.metaText}>{item.num_passageiros} passageiro(s)</Text>
+          </View>
+          <Text style={[styles.price, { color: sColor === colors.textMuted ? colors.primary : sColor }]}>
+            R$ {preco}
+          </Text>
+        </View>
+
+        {/* cancel */}
+        {canCancel && (
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={onCancel}
+            disabled={canceling}
+            activeOpacity={0.7}
+          >
+            {canceling ? (
+              <ActivityIndicator size="small" color={colors.danger} />
+            ) : (
+              <>
+                <Ionicons name="close-circle-outline" size={15} color={colors.danger} />
+                <Text style={styles.cancelText}>Cancelar reserva</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* chevron */}
+      <View style={styles.chevronWrap}>
+        <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 export default function BookingsScreen() {
   const qc = useQueryClient();
@@ -38,198 +115,176 @@ export default function BookingsScreen() {
   });
 
   const { data: destinations = [] } = useQuery({
-    queryKey: ['destinos'],
-    queryFn: () => destinationService.list(),
+    queryKey: ['destinos-all'],
+    queryFn: () => destinationService.listAll(),
+    staleTime: 5 * 60 * 1000,
   });
 
-  const destinoMap = new Map<number, Destino>(
-    destinations.map((d) => [d.id, d])
-  );
+  const destinoMap = new Map<number, Destino>(destinations.map((d) => [d.id, d]));
 
   const cancelMutation = useMutation({
     mutationFn: (id: number) => bookingService.cancel(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reservas'] }),
-    onError: (error) =>
-      Alert.alert('Erro', error instanceof Error ? error.message : 'Não foi possível cancelar.'),
+    onError: (err) =>
+      Alert.alert('Erro', err instanceof Error ? err.message : 'Não foi possível cancelar.'),
   });
 
   function confirmCancel(id: number) {
     Alert.alert(
-      'Cancelar Reserva',
-      'Tem certeza que deseja cancelar esta reserva?',
+      'Cancelar reserva',
+      'Tem certeza? Esta ação não pode ser desfeita.',
       [
         { text: 'Não', style: 'cancel' },
-        { text: 'Sim', style: 'destructive', onPress: () => cancelMutation.mutate(id) },
+        { text: 'Cancelar reserva', style: 'destructive', onPress: () => cancelMutation.mutate(id) },
       ]
-    );
-  }
-
-  function renderItem({ item }: { item: Reserva }) {
-    const statusKey = item.status ?? 'PENDENTE';
-    const canCancel = statusKey === 'PENDENTE' || statusKey === 'CONFIRMADO';
-    const destino = destinoMap.get(item.destino_id);
-
-    return (
-      <View style={styles.card}>
-        <Text style={styles.destination}>
-          {destino ? destino.nome : `Destino #${item.destino_id}`}
-        </Text>
-
-        <Text style={styles.info}>
-          Saída: {new Date(item.departure_date).toLocaleDateString('pt-BR')}
-        </Text>
-
-        <Text style={styles.info}>
-          Retorno: {new Date(item.return_date).toLocaleDateString('pt-BR')}
-        </Text>
-
-        <Text style={styles.info}>
-          Passageiros: {item.num_passageiros}
-        </Text>
-
-        <Text style={[styles.status, { color: STATUS_COLOR[statusKey] ?? '#94A3B8' }]}>
-          {STATUS_LABEL[statusKey] ?? statusKey}
-        </Text>
-
-        <Text style={styles.price}>
-          R$ {Number(item.valor_total).toLocaleString('pt-BR')}
-        </Text>
-
-        {canCancel && (
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => confirmCancel(item.id)}
-            disabled={cancelMutation.isPending}
-          >
-            <Text style={styles.cancelText}>Cancelar</Text>
-          </TouchableOpacity>
-        )}
-      </View>
     );
   }
 
   if (isLoading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#60A5FA" />
-      </View>
-    );
-  }
-
-  if (isError) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Erro ao carregar reservas.</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
-          <Text style={styles.retryText}>Tentar novamente</Text>
-        </TouchableOpacity>
+      <View style={styles.root}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Minhas Reservas</Text>
+        </View>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Minhas Reservas</Text>
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Minhas Reservas</Text>
+        <Text style={styles.subtitle}>
+          {bookings.length} {bookings.length === 1 ? 'reserva' : 'reservas'}
+        </Text>
+      </View>
 
-      <TouchableOpacity
-        style={styles.newButton}
-        onPress={() => router.push('/destinations')}
-      >
-        <Text style={styles.newButtonText}>+ Nova Reserva</Text>
-      </TouchableOpacity>
-
-      <FlatList
-        data={bookings}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Você ainda não tem reservas.</Text>
-        }
-      />
+      {isError ? (
+        <EmptyState
+          icon="wifi-outline"
+          title="Erro ao carregar reservas"
+          actionLabel="Tentar novamente"
+          onAction={() => refetch()}
+        />
+      ) : (
+        <FlatList
+          data={bookings}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <BookingCard
+              item={item}
+              destino={destinoMap.get(item.destino_id)}
+              onCancel={() => confirmCancel(item.id)}
+              canceling={cancelMutation.isPending && cancelMutation.variables === item.id}
+              onPress={() => router.push(`/booking-detail?id=${item.id}`)}
+            />
+          )}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <EmptyState
+              icon="calendar-outline"
+              title="Nenhuma reserva ainda"
+              subtitle="Explore os destinos e faça sua primeira reserva espacial!"
+              actionLabel="Explorar destinos"
+              onAction={() => router.push('/destinations')}
+            />
+          }
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#020617',
-    padding: 20,
-  },
-  centered: {
-    flex: 1,
-    backgroundColor: '#020617',
-    justifyContent: 'center',
+  root: { flex: 1, backgroundColor: colors.bg },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingTop: 52,
+    paddingBottom: 16,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 20,
-  },
-  newButton: {
-    backgroundColor: '#16A34A',
-    padding: 14,
-    borderRadius: 12,
+  title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: '700' },
+  subtitle: { color: colors.textSecondary, fontSize: fontSize.sm, marginTop: 2 },
+  newBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    gap: 4,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: radius.pill,
   },
-  newButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
+  newBtnText: { color: colors.white, fontWeight: '700', fontSize: fontSize.sm },
+
+  list: { padding: spacing.md, gap: 12, paddingBottom: 90 },
+
+  // Card
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
   },
-  destination: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
+  accentBar: { width: 4 },
+  cardBody: { flex: 1, padding: 14, gap: 8 },
+  chevronWrap: {
+    justifyContent: 'center',
+    paddingRight: 14,
+    paddingLeft: 6,
   },
-  info: {
-    color: '#94A3B8',
-    marginTop: 5,
-  },
-  status: {
-    fontWeight: '700',
-    marginTop: 8,
-  },
-  price: {
-    color: '#60A5FA',
-    fontWeight: '700',
-    marginTop: 8,
-  },
-  cancelButton: {
-    backgroundColor: '#DC2626',
-    marginTop: 12,
-    padding: 10,
-    borderRadius: 8,
+
+  topRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
   },
-  cancelText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+  cardDestino: {
+    color: colors.textPrimary,
+    fontSize: fontSize.base,
+    fontWeight: '700',
+    flex: 1,
   },
-  errorText: {
-    color: '#F87171',
-    marginBottom: 16,
+  statusPill: {
+    borderRadius: radius.pill,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderWidth: 1,
+    flexShrink: 0,
   },
-  retryButton: {
-    backgroundColor: '#2563EB',
-    padding: 12,
-    borderRadius: 10,
+  statusText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3 },
+
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  metaText: { color: colors.textSecondary, fontSize: fontSize.sm },
+
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  retryText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+  price: { fontWeight: '700', fontSize: fontSize.base },
+
+  cancelBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingTop: 10,
+    marginTop: 2,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
-  emptyText: {
-    color: '#94A3B8',
-    textAlign: 'center',
-    marginTop: 40,
-  },
+  cancelText: { color: colors.danger, fontSize: fontSize.sm, fontWeight: '600' },
 });
