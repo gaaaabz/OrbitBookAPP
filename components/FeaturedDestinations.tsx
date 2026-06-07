@@ -8,12 +8,12 @@ import { destinationService } from '../services/destinationService';
 export default function FeaturedDestinations() {
   const router = useRouter();
 
-  const { data: destinations = [], isLoading, isError } = useQuery({
-    queryKey: ['destinos'],
-    queryFn: () => destinationService.list(),
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['destinos-featured'],
+    queryFn: () => destinationService.list({ page: 1, limit: 4 }),
   });
 
-  const featured = destinations.slice(0, 4);
+  const featured = data?.items ?? [];
 
   return (
     <View style={styles.container}>
