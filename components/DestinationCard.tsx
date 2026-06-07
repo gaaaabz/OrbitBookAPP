@@ -1,56 +1,36 @@
-import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
-import { useRouter } from "expo-router";
-
-interface Destination {
-  id: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  basePrice: number;
-}
+import React from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import type { Destino } from '../services/types';
 
 interface Props {
-  destination: Destination;
+  destination: Destino;
 }
 
-export default function DestinationCard({
-  destination,
-}: Props) {
+export default function DestinationCard({ destination }: Props) {
   const router = useRouter();
 
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() =>
-        router.push(
-          `/destination-details?id=${destination.id}`
-        )
-      }
+      onPress={() => router.push(`/destination-details?id=${destination.id}`)}
     >
-      <Image
-        source={{ uri: destination.imageUrl }}
-        style={styles.image}
-      />
+      <Image source={{ uri: destination.image_url }} style={styles.image} />
 
       <View style={styles.content}>
-        <Text style={styles.name}>
-          {destination.name}
-        </Text>
+        <Text style={styles.name}>{destination.nome}</Text>
 
-        <Text style={styles.description}>
-          {destination.description}
-        </Text>
+        <Text style={styles.description}>{destination.descricao}</Text>
 
         <Text style={styles.price}>
-          R$ {destination.basePrice.toLocaleString()}
+          R$ {Number(destination.preco_base).toLocaleString('pt-BR')}
         </Text>
+
+        {destination.avaliacao && destination.avaliacao.total > 0 && (
+          <Text style={styles.rating}>
+            ⭐ {destination.avaliacao.media.toFixed(1)}
+          </Text>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -58,35 +38,35 @@ export default function DestinationCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#111827",
+    backgroundColor: '#111827',
     borderRadius: 16,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
-
   image: {
-    width: "100%",
+    width: '100%',
     height: 180,
   },
-
   content: {
     padding: 16,
   },
-
   name: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontWeight: '700',
+    color: '#FFFFFF',
     marginBottom: 8,
   },
-
   description: {
-    color: "#D1D5DB",
+    color: '#D1D5DB',
     marginBottom: 12,
   },
-
   price: {
-    color: "#60A5FA",
-    fontWeight: "700",
+    color: '#60A5FA',
+    fontWeight: '700',
     fontSize: 16,
+  },
+  rating: {
+    color: '#FBBF24',
+    marginTop: 6,
+    fontSize: 13,
   },
 });

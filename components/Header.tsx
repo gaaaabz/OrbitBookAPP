@@ -17,7 +17,7 @@ export default function Header() {
       {/* Logo */}
       <TouchableOpacity
         style={styles.logoContainer}
-        onPress={() => router.push("/home")}
+        onPress={() => router.push("/")}
       >
         <Ionicons name="rocket-outline" size={24} />
         <Text style={styles.logoText}>OrbitBook</Text>
@@ -39,7 +39,7 @@ export default function Header() {
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
-              router.push("/home");
+              router.push("/");
               setMenuOpen(false);
             }}
           >
@@ -59,7 +59,7 @@ export default function Header() {
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
-              router.push("/compare");
+              router.push("/destinations");
               setMenuOpen(false);
             }}
           >

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -9,61 +9,47 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-} from "react-native";
-import { router } from "expo-router";
+} from 'react-native';
+import { router } from 'expo-router';
+import { useAuth } from '../../contexts/AuthContext';
+import { authService } from '../../services/authService';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+  const { signIn } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Atenção', 'Preencha o email e a senha.');
+      return;
+    }
+
     try {
       setLoading(true);
-
-      /*
-      Futuramente:
-
-      const response = await authService.login({
-        email,
-        password,
+      const { access_token, usuario } = await authService.login({
+        email: email.trim(),
+        senha: password,
       });
-
-      salvar token
-      */
-
-      setTimeout(() => {
-        setLoading(false);
-        router.replace("/home");
-      }, 1000);
+      await signIn(access_token, usuario);
+      router.replace('/destinations');
     } catch (error) {
+      Alert.alert('Erro', error instanceof Error ? error.message : 'Não foi possível realizar o login.');
+    } finally {
       setLoading(false);
-
-      Alert.alert(
-        "Erro",
-        "Não foi possível realizar o login."
-      );
     }
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={
-        Platform.OS === "ios"
-          ? "padding"
-          : undefined
-      }
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.card}>
-        <Text style={styles.logo}>
-          🚀 OrbitBook
-        </Text>
+        <Text style={styles.logo}>🚀 OrbitBook</Text>
 
-        <Text style={styles.title}>
-          Entrar
-        </Text>
+        <Text style={styles.title}>Entrar</Text>
 
         <Text style={styles.subtitle}>
           Faça login para acessar suas viagens
@@ -76,6 +62,8 @@ export default function LoginScreen() {
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
         />
 
         <TextInput
@@ -95,17 +83,11 @@ export default function LoginScreen() {
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.loginText}>
-              Entrar
-            </Text>
+            <Text style={styles.loginText}>Entrar</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() =>
-            router.push("/register")
-          }
-        >
+        <TouchableOpacity onPress={() => router.push('/register')}>
           <Text style={styles.registerText}>
             Não possui conta? Cadastre-se
           </Text>
@@ -118,62 +100,54 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#020617",
-    justifyContent: "center",
+    backgroundColor: '#020617',
+    justifyContent: 'center',
     padding: 20,
   },
-
   card: {
-    backgroundColor: "#111827",
+    backgroundColor: '#111827',
     borderRadius: 20,
     padding: 25,
   },
-
   logo: {
-    color: "#60A5FA",
+    color: '#60A5FA',
     fontSize: 28,
-    fontWeight: "700",
-    textAlign: "center",
+    fontWeight: '700',
+    textAlign: 'center',
     marginBottom: 20,
   },
-
   title: {
-    color: "#FFFFFF",
+    color: '#FFFFFF',
     fontSize: 28,
-    fontWeight: "700",
+    fontWeight: '700',
     marginBottom: 8,
   },
-
   subtitle: {
-    color: "#94A3B8",
+    color: '#94A3B8',
     marginBottom: 25,
   },
-
   input: {
-    backgroundColor: "#1E293B",
+    backgroundColor: '#1E293B',
     borderRadius: 12,
     padding: 14,
-    color: "#FFFFFF",
+    color: '#FFFFFF',
     marginBottom: 15,
   },
-
   loginButton: {
-    backgroundColor: "#2563EB",
+    backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 10,
   },
-
   loginText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
+    color: '#FFFFFF',
+    fontWeight: '600',
     fontSize: 16,
   },
-
   registerText: {
-    color: "#60A5FA",
-    textAlign: "center",
+    color: '#60A5FA',
+    textAlign: 'center',
     marginTop: 20,
   },
 });
