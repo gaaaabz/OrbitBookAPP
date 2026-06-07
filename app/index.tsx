@@ -1,47 +1,36 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { useEffect } from 'react';
+import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { useAuth } from '../contexts/AuthContext';
+import { colors, fontSize } from '../constants/theme';
 
-import Header from "../components/Header";
-import HeroSection from "../components/HeroSection";
-import FeaturedDestinations from "../components/FeaturedDestinations";
-import StatsSection from "../components/StatsSection";
-import AISection from "../components/AISection";
-import TestimonialsSection from "../components/TestimonialsSection";
-import CTASection from "../components/CTASection";
-import Footer from "../components/Footer";
+export default function IndexScreen() {
+  const { user, isLoading } = useAuth();
 
-export default function HomeScreen() {
+  useEffect(() => {
+    if (!isLoading) {
+      router.replace(user ? '/ai' : '/login');
+    }
+  }, [user, isLoading]);
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      <Header />
-
-      <HeroSection />
-
-      <FeaturedDestinations />
-
-      <StatsSection />
-
-      <AISection />
-
-      <TestimonialsSection />
-
-      <CTASection />
-
-      <Footer />
-    </ScrollView>
+    <View style={styles.root}>
+      <Text style={styles.logo}>🚀</Text>
+      <Text style={styles.brand}>OrbitBook</Text>
+      <ActivityIndicator size="large" color={colors.primary} style={styles.spinner} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: "#020617",
+    backgroundColor: colors.bg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
   },
-
-  content: {
-    paddingBottom: 40,
-  },
+  logo: { fontSize: 48 },
+  brand: { color: colors.textPrimary, fontSize: fontSize['2xl'], fontWeight: '800', letterSpacing: 1 },
+  spinner: { marginTop: 32 },
 });
