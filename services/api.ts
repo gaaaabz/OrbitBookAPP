@@ -2,7 +2,7 @@
 // Usar o IP da rede Wi-Fi funciona para: Expo Go em device físico,
 // emulador Android e iOS Simulator — desde que estejam na mesma rede.
 // Para descobrir o IP atual: ipconfig (Windows) ou ifconfig (Mac/Linux)
-export const BASE_URL = 'http://192.168.15.19:8000';
+export const BASE_URL = 'https://orbitbook-api.wittybush-4b565985.southafricanorth.azurecontainerapps.io';
 
 let authToken: string | null = null;
 
