@@ -8,6 +8,26 @@ Uma plataforma revolucionária para reserva e gerenciamento de experiências de 
 
 O projeto se destina a conectar usuários interessados em viagens espaciais com empresas operadoras de missões, permitindo que todo o processo de busca, comparação, recomendação, reserva e acompanhamento da viagem seja realizado de forma integrada, segura e inteligente.
 
+## 🎥 Demonstração
+
+Assista ao vídeo de apresentação do projeto:
+
+[![Assista ao vídeo](https://img.youtube.com/vi/1fErViETqwU/0.jpg)](https://www.youtube.com/watch?v=1fErViETqwU)
+
+[Link direto para o vídeo - YouTube](https://www.youtube.com/watch?v=1fErViETqwU)
+
+## 👥 Integrantes do Projeto
+
+| Nome | RM | Turma |
+|------|-------|-------|
+| Julia Damasceno Busso | RM560293 | 2TDSPA |
+| Gabriel Gomes Cardoso | RM559597 | 2TDSPA |
+| Jhonatan Quispe Torrez | RM560601 | 2TDSPA |
+| Caio Lucas Silva Gomes | RM560077 | 2TDSPA |
+| João Gabriel Fuchs Grecco | RM559863 | 2TDSPA |
+
+---
+
 ### 🎯 Objetivo Principal
 
 A proposta da plataforma é funcionar como um **ecossistema completo de turismo espacial**, reunindo informações sobre destinos como:
@@ -45,30 +65,11 @@ A proposta da plataforma é funcionar como um **ecossistema completo de turismo 
 ✅ **IA e Personalização** - Recomendações baseadas em comportamento do usuário  
 ✅ **Segurança** - Protocolos avançados para proteção de dados sensíveis  
 
-## 🎥 Demonstração
-
-Assista ao vídeo de apresentação do projeto:
-
-[![Assista ao vídeo](https://img.youtube.com/vi/1fErViETqwU/0.jpg)](https://www.youtube.com/watch?v=1fErViETqwU)
-
-[Link direto para o vídeo - YouTube](https://www.youtube.com/watch?v=1fErViETqwU)
-
-## 👥 Integrantes do Projeto
-
-| Nome | RM | Turma |
-|------|-------|-------|
-| Julia Damasceno Busso | RM560293 | 2TDSPA |
-| Gabriel Gomes Cardoso | RM559597 | 2TDSPA |
-| Jhonatan Quispe Torrez | RM560601 | 2TDSPA |
-| Caio Lucas Silva Gomes | RM560077 | 2TDSPA |
-| João Gabriel Fuchs Grecco | RM559863 | 2TDSPA |
-
 ## 🚀 Como Começar
 
 ### Pré-requisitos
 - Node.js 14+
 - npm ou yarn
-- Oracle Database (para ambiente de produção)
 
 ### Instalação
 
@@ -118,6 +119,3 @@ Tudo isso em uma única plataforma digital integrada e escalável.
 
 Projeto em desenvolvimento ativo como parte do curso de **Tecnologia em Desenvolvimento de Software Para a Internet (2TDSPA)**.
 
----
-
-**Desenvolvido com 🚀 pela equipe OrbitBook**
