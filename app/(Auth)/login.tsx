@@ -11,7 +11,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
@@ -129,6 +129,21 @@ export default function LoginScreen() {
               <Text style={styles.registerLink}> Criar conta grátis</Text>
             </TouchableOpacity>
           </View>
+        </View>
+        <View>
+                  <Link href="../about" asChild>
+            <TouchableOpacity style={{ marginTop: 20, alignItems: "center" }}>
+              <Text
+                style={{
+                  color: "#007AFF",
+                  textDecorationLine: "underline",
+                  fontSize: 16,
+                }}
+              >
+                Sobre Nós
+              </Text>
+            </TouchableOpacity>
+          </Link>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

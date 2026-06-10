@@ -172,21 +172,6 @@ export default function AboutScreen() {
           </Text>
         </View>
 
-        {/* Contato */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="mail-outline" size={24} color="#60A5FA" />
-            <Text style={styles.sectionTitle}>Fale Conosco</Text>
-          </View>
-          <Text style={styles.sectionText}>
-            Tem dúvidas? Nossa equipe está pronta para ajudar!
-          </Text>
-          <TouchableOpacity style={styles.contactButton}>
-            <Ionicons name="call-outline" size={18} color="#FFFFFF" />
-            <Text style={styles.contactButtonText}>Entre em Contato</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Botão CTA */}
         <TouchableOpacity
           style={styles.ctaButton}

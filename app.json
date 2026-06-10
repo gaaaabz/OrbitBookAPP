@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "OrangeRoute",
-    "slug": "OrangeRoute",
+    "name": "OrbitBook",
+    "slug": "OrbitBook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.gabrielggc.OrbitBook"
     },
     "web": {
       "output": "static",
@@ -43,6 +44,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9513534e-204f-4e26-95e1-56205a150f29"
+      }
     }
   }
 }
